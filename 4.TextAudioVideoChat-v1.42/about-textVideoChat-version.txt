@@ -1,0 +1,5 @@
+Provides the following functions:
+
+1) Text Chat
+2) Audio
+3) Video
