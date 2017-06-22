@@ -1,0 +1,4 @@
+Provides the following functions:
+
+1) Text chat
+2) File transfer 10MB

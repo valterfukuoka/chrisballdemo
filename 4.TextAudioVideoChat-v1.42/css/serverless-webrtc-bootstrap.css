@@ -1,0 +1,17 @@
+textarea { resize:none; }
+
+video {
+   width:100%;
+   max-width:500px;
+   height:auto;
+}
+
+
+.text-red {
+  color: #FF0000;
+}
+
+a.text-red:hover,
+a.text-red:focus {
+  color: #FF0000;
+}

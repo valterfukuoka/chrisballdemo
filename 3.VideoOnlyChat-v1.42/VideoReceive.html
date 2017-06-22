@@ -1,0 +1,178 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>VideoOnlyReceive</title>
+    <script src="js/adapter.js"></script>
+    <script src="js/jquery-2.0.0.js"></script>
+    <script src="js/bootstrap.js"></script>
+    <script src="js/copy2clip.js"></script>
+        
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <link href="css/bootstrap-responsive.css" rel="stylesheet">
+    <link href="css/serverless-webrtc-bootstrap.css" rel="stylesheet">
+    
+</head>
+
+<body>
+<!--
+<a href="https://github.com/cjb/serverless-webrtc/"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_green_007200.png" alt="Fork me on GitHub"></a>
+-->
+
+<!-- Heading Title bar... -->
+<div style="background-color: Gold; text-align: center; color: Blue; font-weight: bold;  
+            font-size: 180%; height: 35px; width: 100%; margin: 0px 0px 0px 0px ">
+WebRTC Video ONLY Demo
+</div>
+
+<div style="height: 5px; width: 800px;"></div>
+<div id="the whole thing" style="height:100%; width:100%; overflow: hidden;">
+
+    <div style="float: left; width: 15px; background-color:white;">&nbsp;</div>	
+    <div style="float: left; width:45%; background-color:gold;">YOUR VIDEO (Local)</div>
+    <div style="float: left; width: 15px; background-color:white;">&nbsp;</div>	    
+    <div style="float: left; width:45%; background-color:LightBlue;">REMOTE VIDEO (Creator)</div>
+
+</div> <!-- End Side Float -->
+
+
+<div style="float: left; width: 15px; background-color:white;">&nbsp;</div>	
+<!-- Local Video (YOUR) -->
+<div  style="float: left; width:45%; background-color:gold;">
+
+  <Video id="localVideo">
+</div>
+    <div style="float: left; width: 15px; background-color:white;">&nbsp;</div>	
+<!-- Remote Video -->
+<div style="float: left; width:45%; background-color:LightBlue;">
+
+  <Video id="remoteVideo">
+</div>
+
+
+<!-- The Text Chat Area -->
+<div style="clear:both; margin: 10px;">
+	Connection Status:
+  <fieldset class="well">
+    <div class="text-info" id="chatlog" style="height:50px; overflow:auto;">
+    </div>
+  </fieldset>
+  <form class="form-inline" onSubmit="return sendMessage()" action="">
+    <!-- <input type="text" id="messageTextBox" placeholder="Type your message here"> -->
+    <!-- <button type="submit" id="sendMessageBtn" class="btn">Send</button> -->
+  </form>
+</div>
+
+
+<!-- Footer bar... -->
+<div style="clear:both;" ></div>
+<div style="background-color: Gold; text-align: center; color: Black; 
+font-weight: bold;  font-size: 110%; height: 21px; width: 100%; vertical-align: middle; ">
+WebRTC Private Room - Open Source, Open Standard, 100% Browser-to-Browser, NO plugin, NO server!
+</div>
+
+
+<!-- Local Offer -->
+<!-- CREATION -->
+<div style="background-color: #009900;" class="modal" id="showLocalOffer" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" hidden>
+  <div class="modal-header">
+    <h3 id="myModalLabel" style="color:white">Send your local offer to someone else</h3>
+  </div>
+  <div class="modal-body" style="color:white">
+    Here's your "offer" -- it tells someone else how to connect to you.  Send the whole thing to them, for example in an instant message or e-mail.
+  <br/>
+  <textarea class="input-xlarge" id="localOffer" name="localOffer" rows="10" cols="100" style="color:red"></textarea><br>
+  <button id="demo" onclick="copyToClipboard(document.getElementById('localOffer').innerHTML)">Copy to Clipboard</button>
+  </div>
+  
+  <div class="modal-footer">
+    <button class="btn btn-primary" id="offerSentBtn" data-dismiss="modal" aria-hidden="true" style="color: black">Okay, I sent it (the offer).</button>
+  </div>
+
+</div>
+
+
+<!-- Local Answer -->
+<!-- JOIN -->
+<div style="background-color: #009900;" class="modal" id="showLocalAnswer" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" hidden>
+  <div class="modal-header">
+    <h3 id="myModalLabel" style="color:white">Send your local answer BACK to someone</h3>
+  </div>
+  <div class="modal-body" style="color:white">
+    Here's your "answer" -- it tells someone else how to connect to you.  Send the whole thing to them, for example in an instant message or e-mail.
+  <br/>
+  <textarea class="input-xlarge" id="localAnswer" name="localAnswer" rows="10" cols="100" style="color:green"></textarea><br>
+  <button id="demo" onclick="copyToClipboard(document.getElementById('localAnswer').innerHTML)" style="color:black">Copy to Clipboard</button>  
+  </div>
+  
+  <div class="modal-footer">
+    <button class="btn btn-primary" id="answerSentBtn" data-dismiss="modal" aria-hidden="true" >Okay, I sent it (my answer).</button>
+  </div>
+
+</div>
+
+
+<!-- Accept the Offer -->
+<!-- JOIN -->
+<div style="background-color: #009900;" class="modal" id="getRemoteOffer" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" hidden>
+  <div class="modal-header">
+    <h3 id="myModalLabel" style="color:white">Paste the "offer" you received</h3>
+  </div>
+  <div class="modal-body" style="color:white">
+    The person who created the room will send you an "offer" string -- paste it here.
+  <br/>
+  <textarea class="input-xlarge" id="remoteOffer" name="remoteOffer" rows="10" cols="100" style="color: black"></textarea>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-primary" id="offerRecdBtn" data-dismiss="modal" aria-hidden="true">Okay, I pasted it (the received offer).</button>
+  </div>
+</div>
+
+
+<!-- Accept back the Answer -->
+<!-- CREATION -->
+<div style="background-color: #009900;" class="modal" id="getRemoteAnswer" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" hidden>
+  <div class="modal-header">
+    <h3 id="myModalLabel" style="color:white">Paste the "answer" you received</h3>
+  </div>
+  <div class="modal-body" style="color:white">
+    Now paste in the "answer" that was sent back to you.
+  <br/>
+  <textarea class="input-xlarge" id="remoteAnswer" name="remoteAnswer" rows="10" cols="100" style="color: black"></textarea>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-primary" id="answerRecdBtn" data-dismiss="modal" aria-hidden="true" style="color:black">Okay, I pasted it (the received answer).</button>
+  </div>
+</div>
+
+
+<!-- Waiting for Connection -->
+<div style="background-color: #009900;" class="modal" id="waitForConnection" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" hidden>
+  <div class="modal-header">
+    <h3 id="myModalLabel" style="color:white">Waiting for connection</h3>
+  </div>
+  <div class="modal-body">
+    This dialog will disappear when a connection is made.
+  </div>
+  <div class="spinner" align="center">
+    <img src="img/spinner.gif"></img>
+  </div>
+</div>
+
+
+<!-- Join or Create Screen -->
+<div style="background-color: #009900;" class="modal" id="createOrJoin" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-header">
+    <h3 id="myModalLabel" style="color:white">Join a WebRTC Room?</h3>
+  </div>
+  <div class="modal-footer" style="background-color: #00DD00;">
+        <button class="btn btn-primary" id="joinBtn" data-dismiss="modal" aria-hidden="true" style="width: 100px;">Join</button>
+  </div>
+</div>
+
+
+<script src="js/webrtc-video.js"></script>
+
+
+</body>
+</html>
